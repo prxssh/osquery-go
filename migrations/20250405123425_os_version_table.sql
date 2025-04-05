@@ -1,8 +1,8 @@
 -- +goose Up
 CREATE TABLE os_version (
     id SERIAL,
-    name TEXT,
-    version TEXT,
+    name TEXT NOT NULL,
+    version TEXT NOT NULL,
     major INTEGER,
     minor INTEGER,
     patch INTEGER,
@@ -20,7 +20,7 @@ CREATE TABLE os_version (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
 
     PRIMARY KEY (id),
-    UNIQUE (name, major, minor, patch)
+    UNIQUE (name, version)
 );
 
 -- +goose Down

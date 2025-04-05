@@ -34,7 +34,7 @@ INSERT INTO osquery_info (
     platform_mask
 ) VALUES (
     $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
-) ON CONFLICT (instance_id, uuid) DO UPDATE SET
+) ON CONFLICT (uuid) DO UPDATE SET
     pid = $1,
     version = $4,
     config_hash = $5,

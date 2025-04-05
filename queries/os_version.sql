@@ -21,7 +21,7 @@ SELECT
 FROM
     os_version;
 
---- name: UpsertOSDetails :one
+-- name: UpsertOSDetails :one
 INSERT INTO os_version (
     name,
     version,
@@ -40,7 +40,7 @@ INSERT INTO os_version (
     mount_namespace_id
 ) VALUES (
     $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
-) ON CONFLICT (platform, version) DO UPDATE SET
+) ON CONFLICT (name, version) DO UPDATE SET
     name = $1,
     major = $3,
     minor = $4,

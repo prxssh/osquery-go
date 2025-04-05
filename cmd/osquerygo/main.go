@@ -5,15 +5,14 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"time"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
-	"github.com/osquery/osquery-go"
 	"github.com/pressly/goose/v3"
 
 	"github.com/prxssh/osquery-go/api"
 	"github.com/prxssh/osquery-go/config"
 	"github.com/prxssh/osquery-go/config/postgres"
+	"github.com/prxssh/osquery-go/internal/osquery"
 	"github.com/prxssh/osquery-go/internal/repo"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -27,6 +26,9 @@ func main() {
 
 	dbClient := initPostgres()
 	repo := repo.NewRepo(dbClient)
+
+	jobClient := osquery.NewOsqueryJobs(dbClient)
+	jobClient.ScheduleOsqueryJobs()
 
 	if err := api.StartServer(repo); err != nil {
 		log.Fatal().Msgf("Failed to start server: %v", err)
@@ -78,16 +80,4 @@ func runGooseMigrations() {
 	}
 
 	log.Info().Msg("goose: completed successfully!")
-}
-
-func newOsqueryClient() osquery.ExtensionManager {
-	fmt.Println("osquery client", config.Env.OsquerySocketFilePath)
-	client, err := osquery.NewClient(
-		config.Env.OsquerySocketFilePath,
-		10*time.Second,
-	)
-	if err != nil {
-		log.Fatal().Msgf("osquery: error creating osquery client: %v", err)
-	}
-	return client
 }

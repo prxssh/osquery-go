@@ -35,8 +35,8 @@ type App struct {
 
 type OsVersion struct {
 	ID               int32          `json:"id"`
-	Name             sql.NullString `json:"name"`
-	Version          sql.NullString `json:"version"`
+	Name             string         `json:"name"`
+	Version          string         `json:"version"`
 	Major            sql.NullInt32  `json:"major"`
 	Minor            sql.NullInt32  `json:"minor"`
 	Patch            sql.NullInt32  `json:"patch"`

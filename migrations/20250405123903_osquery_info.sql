@@ -17,7 +17,7 @@ CREATE TABLE osquery_info (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
 
     PRIMARY KEY (id),
-    UNIQUE (instance_id, uuid)
+    UNIQUE (uuid)
 );
 
 -- +goose Down

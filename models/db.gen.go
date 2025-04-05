@@ -39,6 +39,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.upsertAppStmt, err = db.PrepareContext(ctx, upsertApp); err != nil {
 		return nil, fmt.Errorf("error preparing query UpsertApp: %w", err)
 	}
+	if q.upsertOSDetailsStmt, err = db.PrepareContext(ctx, upsertOSDetails); err != nil {
+		return nil, fmt.Errorf("error preparing query UpsertOSDetails: %w", err)
+	}
 	return &q, nil
 }
 
@@ -67,6 +70,11 @@ func (q *Queries) Close() error {
 	if q.upsertAppStmt != nil {
 		if cerr := q.upsertAppStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing upsertAppStmt: %w", cerr)
+		}
+	}
+	if q.upsertOSDetailsStmt != nil {
+		if cerr := q.upsertOSDetailsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing upsertOSDetailsStmt: %w", cerr)
 		}
 	}
 	return err
@@ -106,23 +114,25 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                 DBTX
-	tx                 *sql.Tx
-	getOSDetailsStmt   *sql.Stmt
-	getOsqueryInfoStmt *sql.Stmt
-	listAppsStmt       *sql.Stmt
-	upsertStmt         *sql.Stmt
-	upsertAppStmt      *sql.Stmt
+	db                  DBTX
+	tx                  *sql.Tx
+	getOSDetailsStmt    *sql.Stmt
+	getOsqueryInfoStmt  *sql.Stmt
+	listAppsStmt        *sql.Stmt
+	upsertStmt          *sql.Stmt
+	upsertAppStmt       *sql.Stmt
+	upsertOSDetailsStmt *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                 tx,
-		tx:                 tx,
-		getOSDetailsStmt:   q.getOSDetailsStmt,
-		getOsqueryInfoStmt: q.getOsqueryInfoStmt,
-		listAppsStmt:       q.listAppsStmt,
-		upsertStmt:         q.upsertStmt,
-		upsertAppStmt:      q.upsertAppStmt,
+		db:                  tx,
+		tx:                  tx,
+		getOSDetailsStmt:    q.getOSDetailsStmt,
+		getOsqueryInfoStmt:  q.getOsqueryInfoStmt,
+		listAppsStmt:        q.listAppsStmt,
+		upsertStmt:          q.upsertStmt,
+		upsertAppStmt:       q.upsertAppStmt,
+		upsertOSDetailsStmt: q.upsertOSDetailsStmt,
 	}
 }
