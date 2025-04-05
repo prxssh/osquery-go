@@ -13,7 +13,8 @@ type env struct {
 		Port     string `required:"true" split_words:"true"`
 		Dbname   string `required:"true" split_words:"true"`
 	}
-	GooseMigrationDir string `required:"true" split_words:"true"`
+	GooseMigrationDir     string `required:"true" split_words:"true"`
+	OsquerySocketFilePath string `required:"true" split_words:"true"`
 }
 
 var Env env

@@ -5,8 +5,10 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"time"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
+	"github.com/osquery/osquery-go"
 	"github.com/pressly/goose/v3"
 
 	"github.com/prxssh/osquery-go/config"
@@ -18,6 +20,7 @@ import (
 
 func main() {
 	initLogger()
+	config.Init()
 	runGooseMigrations()
 
 	log.Info().Msg("osquerygo is up and running")
@@ -68,4 +71,16 @@ func runGooseMigrations() {
 	}
 
 	log.Info().Msg("goose: completed successfully!")
+}
+
+func newOsqueryClient() osquery.ExtensionManager {
+	fmt.Println("osquery client", config.Env.OsquerySocketFilePath)
+	client, err := osquery.NewClient(
+		config.Env.OsquerySocketFilePath,
+		10*time.Second,
+	)
+	if err != nil {
+		log.Fatal().Msgf("osquery: error creating osquery client: %v", err)
+	}
+	return client
 }

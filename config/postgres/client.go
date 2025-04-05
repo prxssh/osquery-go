@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	_ "github.com/lib/pq"
+	"github.com/prxssh/osquery-go/config"
 )
 
 type PostgresClient struct {
