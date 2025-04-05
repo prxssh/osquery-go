@@ -27,7 +27,7 @@ func StartServer(repo *repo.Repo) error {
 }
 
 func initAPIServices(router *gin.Engine, repo *repo.Repo) {
-	osqRoutes := router.Group("/v1")
+	osqRoutes := router.Group("/")
 	osqClient := osquery.NewOsqueryAPIService(repo)
 
 	osqClient.InitRoutes(osqRoutes)
