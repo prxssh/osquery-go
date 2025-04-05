@@ -5,9 +5,11 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/prxssh/osquery-go/api/osquery"
+	"github.com/prxssh/osquery-go/internal/repo"
 )
 
-func StartServer() error {
+func StartServer(repo *repo.Repo) error {
 	gin.SetMode(gin.ReleaseMode)
 	corsOpts := cors.New(cors.Config{
 		AllowHeaders:     []string{"*"},
@@ -19,12 +21,16 @@ func StartServer() error {
 	router.Use(corsOpts)
 
 	router.GET("/ping", heartbeat)
-	initAPIServices(router)
+	initAPIServices(router, repo)
 
 	return router.Run(":6969")
 }
 
-func initAPIServices(router *gin.Engine) {
+func initAPIServices(router *gin.Engine, repo *repo.Repo) {
+	osqRoutes := router.Group("/v1")
+	osqClient := osquery.NewOsqueryAPIService(repo)
+
+	osqClient.InitRoutes(osqRoutes)
 }
 
 func heartbeat(c *gin.Context) {
