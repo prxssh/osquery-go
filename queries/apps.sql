@@ -25,7 +25,11 @@ SELECT
 FROM
     apps
 ORDER BY 
-    name;
+    name
+LIMIT 
+    $1
+OFFSET 
+    $2;
 
 -- name: UpsertApp :one
 INSERT INTO apps (
@@ -74,3 +78,9 @@ RETURNING id, name, path, bundle_executable, bundle_identifier, bundle_name,
           element, compiler, development_region, display_name, info_string, 
           minimum_system_version, category, applescript_enabled, copyright, 
           last_opened_time, created_at, updated_at;
+
+-- name: CountApplications :one
+SELECT
+    COUNT(id)
+FROM
+    apps;

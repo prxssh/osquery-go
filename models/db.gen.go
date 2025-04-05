@@ -24,6 +24,9 @@ func New(db DBTX) *Queries {
 func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	q := Queries{db: db}
 	var err error
+	if q.countApplicationsStmt, err = db.PrepareContext(ctx, countApplications); err != nil {
+		return nil, fmt.Errorf("error preparing query CountApplications: %w", err)
+	}
 	if q.getOSDetailsStmt, err = db.PrepareContext(ctx, getOSDetails); err != nil {
 		return nil, fmt.Errorf("error preparing query GetOSDetails: %w", err)
 	}
@@ -47,6 +50,11 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 
 func (q *Queries) Close() error {
 	var err error
+	if q.countApplicationsStmt != nil {
+		if cerr := q.countApplicationsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing countApplicationsStmt: %w", cerr)
+		}
+	}
 	if q.getOSDetailsStmt != nil {
 		if cerr := q.getOSDetailsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getOSDetailsStmt: %w", cerr)
@@ -114,25 +122,27 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                  DBTX
-	tx                  *sql.Tx
-	getOSDetailsStmt    *sql.Stmt
-	getOsqueryInfoStmt  *sql.Stmt
-	listAppsStmt        *sql.Stmt
-	upsertStmt          *sql.Stmt
-	upsertAppStmt       *sql.Stmt
-	upsertOSDetailsStmt *sql.Stmt
+	db                    DBTX
+	tx                    *sql.Tx
+	countApplicationsStmt *sql.Stmt
+	getOSDetailsStmt      *sql.Stmt
+	getOsqueryInfoStmt    *sql.Stmt
+	listAppsStmt          *sql.Stmt
+	upsertStmt            *sql.Stmt
+	upsertAppStmt         *sql.Stmt
+	upsertOSDetailsStmt   *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                  tx,
-		tx:                  tx,
-		getOSDetailsStmt:    q.getOSDetailsStmt,
-		getOsqueryInfoStmt:  q.getOsqueryInfoStmt,
-		listAppsStmt:        q.listAppsStmt,
-		upsertStmt:          q.upsertStmt,
-		upsertAppStmt:       q.upsertAppStmt,
-		upsertOSDetailsStmt: q.upsertOSDetailsStmt,
+		db:                    tx,
+		tx:                    tx,
+		countApplicationsStmt: q.countApplicationsStmt,
+		getOSDetailsStmt:      q.getOSDetailsStmt,
+		getOsqueryInfoStmt:    q.getOsqueryInfoStmt,
+		listAppsStmt:          q.listAppsStmt,
+		upsertStmt:            q.upsertStmt,
+		upsertAppStmt:         q.upsertAppStmt,
+		upsertOSDetailsStmt:   q.upsertOSDetailsStmt,
 	}
 }

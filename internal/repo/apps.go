@@ -9,9 +9,10 @@ import (
 )
 
 type IApps interface {
-	List(ctx context.Context) ([]models.App, error)
+	Count(ctx context.Context) (int64, error)
 	Upsert(ctx context.Context, params map[string]any) error
 	UpsertWithTx(ctx context.Context, params []map[string]any) error
+	List(ctx context.Context, limit int32, offset int32) ([]models.App, error)
 }
 
 type AppsRepo struct {
@@ -22,6 +23,11 @@ func NewAppsRepo(dbClient *postgres.PostgresClient) IApps {
 	return &AppsRepo{
 		client: dbClient,
 	}
+}
+
+func (r *AppsRepo) Count(ctx context.Context) (int64, error) {
+	qtx := models.New(r.client)
+	return qtx.CountApplications(ctx)
 }
 
 func (r *AppsRepo) Upsert(ctx context.Context, params map[string]any) error {
@@ -53,9 +59,16 @@ func (r *AppsRepo) UpsertWithTx(
 	return txn.Commit()
 }
 
-func (r *AppsRepo) List(ctx context.Context) ([]models.App, error) {
+func (r *AppsRepo) List(
+	ctx context.Context,
+	limit int32,
+	offset int32,
+) ([]models.App, error) {
 	qtx := models.New(r.client)
-	return qtx.ListApps(ctx)
+	return qtx.ListApps(
+		ctx,
+		models.ListAppsParams{Limit: limit, Offset: offset},
+	)
 }
 
 func mapAppParams(data map[string]any) models.UpsertAppParams {

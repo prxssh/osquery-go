@@ -10,6 +10,20 @@ import (
 	"database/sql"
 )
 
+const countApplications = `-- name: CountApplications :one
+SELECT
+    COUNT(id)
+FROM
+    apps
+`
+
+func (q *Queries) CountApplications(ctx context.Context) (int64, error) {
+	row := q.queryRow(ctx, q.countApplicationsStmt, countApplications)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const listApps = `-- name: ListApps :many
 SELECT
     id,
@@ -38,10 +52,19 @@ FROM
     apps
 ORDER BY 
     name
+LIMIT 
+    $1
+OFFSET 
+    $2
 `
 
-func (q *Queries) ListApps(ctx context.Context) ([]App, error) {
-	rows, err := q.query(ctx, q.listAppsStmt, listApps)
+type ListAppsParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) ListApps(ctx context.Context, arg ListAppsParams) ([]App, error) {
+	rows, err := q.query(ctx, q.listAppsStmt, listApps, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
