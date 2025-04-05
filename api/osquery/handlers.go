@@ -13,19 +13,6 @@ import (
 	"github.com/prxssh/osquery-go/models"
 )
 
-type osqueryInfo struct {
-	Version    string `json:"version"   binding:"required"`
-	Platform   string `json:"platform"  binding:"required"`
-	Extensions string `json:"extension" binding:"required"`
-}
-
-type osDetails struct {
-	Name     string `json:"name"     binding:"required"`
-	Arch     string `json:"arch"     binding:"required"`
-	Version  string `json:"version"  binding:"required"`
-	Platform string `json:"platform" binding:"required"`
-}
-
 type app struct {
 	Name         string `json:"name"           binding:"required"`
 	Path         string `json:"path"           binding:"required"`
@@ -37,9 +24,9 @@ type app struct {
 }
 
 type latestDataResp struct {
-	OsDetails   *osDetails   `json:"os_details"   binding:"required"`
-	OsqueryInfo *osqueryInfo `json:"osquery_info" binding:"required"`
-	AppDetails  []*app       `json:"applications" binding:"required"`
+	OsVersion      string `json:"os_version"      binding:"required"`
+	OsqueryVersion string `json:"osquery_version" binding:"required"`
+	AppDetails     []*app `json:"applications"    binding:"required"`
 }
 
 const (
@@ -73,18 +60,7 @@ func (osq *OsqueryAPIService) latestData(c *gin.Context) {
 		return
 	}
 
-	osqueryDetails, err := osq.repo.OsqueryInfo.Get(ctx)
-	if err != nil {
-		sendErrorResponse(
-			c,
-			http.StatusInternalServerError,
-			errInternalServer,
-			errMsgInternalServer,
-		)
-		return
-	}
-
-	osDetails, err := osq.repo.OsVersion.Get(ctx)
+	version, err := osq.repo.Versions.Get(ctx)
 	if err != nil {
 		sendErrorResponse(
 			c,
@@ -122,9 +98,9 @@ func (osq *OsqueryAPIService) latestData(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"status": "OK",
 		"data": &latestDataResp{
-			AppDetails:  apps,
-			OsDetails:   parseOsDetails(osDetails),
-			OsqueryInfo: parseOsqueryInfo(osqueryDetails),
+			AppDetails:     apps,
+			OsVersion:      version.OsVersion,
+			OsqueryVersion: version.OsqueryVersion,
 		},
 		"pagination": gin.H{
 			"current_page": page,
@@ -133,23 +109,6 @@ func (osq *OsqueryAPIService) latestData(c *gin.Context) {
 			"total_items":  totalApps,
 		},
 	})
-}
-
-func parseOsqueryInfo(data models.OsqueryInfo) *osqueryInfo {
-	return &osqueryInfo{
-		Version:    data.Version.String,
-		Platform:   data.BuildPlatform.String,
-		Extensions: data.Extensions.String,
-	}
-}
-
-func parseOsDetails(data models.OsVersion) *osDetails {
-	return &osDetails{
-		Name:     data.Name,
-		Version:  data.Version,
-		Arch:     data.Arch.String,
-		Platform: data.Platform.String,
-	}
 }
 
 func getPaginatedAppDetails(

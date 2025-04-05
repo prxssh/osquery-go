@@ -5,17 +5,15 @@ import (
 )
 
 type Repo struct {
-	Apps        IApps
-	OsVersion   IOsVersion
-	OsqueryInfo IOsqueryInfo
-	client      *postgres.PostgresClient
+	Apps     IApps
+	Versions IVersions
+	client   *postgres.PostgresClient
 }
 
 func NewRepo(dbClient *postgres.PostgresClient) *Repo {
 	return &Repo{
-		client:      dbClient,
-		Apps:        NewAppsRepo(dbClient),
-		OsVersion:   NewOsVersionRepo(dbClient),
-		OsqueryInfo: NewOsqueryInfoRepo(dbClient),
+		client:   dbClient,
+		Apps:     NewAppsRepo(dbClient),
+		Versions: NewVersionsRepo(dbClient),
 	}
 }

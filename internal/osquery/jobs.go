@@ -29,22 +29,21 @@ func NewOsqueryJobs(dbClient *postgres.PostgresClient) *JobsInfo {
 		repo: repo.NewRepo(dbClient),
 		queries: []*Query{
 			{
-				Name:    "OS Version",
-				SQL:     "SELECT * FROM os_version;",
+				Name: "Version",
+				SQL: `
+                SELECT version AS version_value, 'OS' AS version_type
+                FROM os_version
+                UNION ALL
+                SELECT version AS version_value, 'OSQuery' AS version_type
+                FROM osquery_info;`,
 				Every:   10 * time.Second,
-				Handler: handleOsqueryGetOsVersionJob,
+				Handler: handleOsqueryGetVersionJob,
 			},
 			{
 				Name:    "Installed Applications",
 				SQL:     "SELECT * FROM apps;",
 				Every:   10 * time.Second,
 				Handler: handleOsqueryGetAppJob,
-			},
-			{
-				Name:    "Osquery Info",
-				SQL:     "SELECT * FROM osquery_info;",
-				Every:   10 * time.Second,
-				Handler: handleOsqueryGetInfoJob,
 			},
 		},
 	}
@@ -93,13 +92,12 @@ func executeAndProcessQuery(repo *repo.Repo, query *Query) error {
 	return query.Handler(repo, results)
 }
 
-func handleOsqueryGetOsVersionJob(
+func handleOsqueryGetVersionJob(
 	repo *repo.Repo,
 	data []map[string]any,
 ) error {
-	_, err := repo.OsVersion.Upsert(context.Background(), data[0])
-	if err != nil {
-		log.Error().Err(err).Msg("failed to upsert osversion")
+	if err := repo.Versions.Upsert(context.Background(), data); err != nil {
+		log.Error().Err(err).Msg("failed to upsert versions")
 		return err
 	}
 
@@ -109,16 +107,6 @@ func handleOsqueryGetOsVersionJob(
 func handleOsqueryGetAppJob(repo *repo.Repo, data []map[string]any) error {
 	if err := repo.Apps.UpsertWithTx(context.Background(), data); err != nil {
 		log.Error().Err(err).Msg("failed to upsert apps details")
-		return err
-	}
-
-	return nil
-}
-
-func handleOsqueryGetInfoJob(repo *repo.Repo, data []map[string]any) error {
-	_, err := repo.OsqueryInfo.Upsert(context.Background(), data[0])
-	if err != nil {
-		log.Error().Err(err).Msg("failed to upsert osquery info")
 		return err
 	}
 

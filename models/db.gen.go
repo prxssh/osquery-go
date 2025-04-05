@@ -27,23 +27,17 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.countApplicationsStmt, err = db.PrepareContext(ctx, countApplications); err != nil {
 		return nil, fmt.Errorf("error preparing query CountApplications: %w", err)
 	}
-	if q.getOSDetailsStmt, err = db.PrepareContext(ctx, getOSDetails); err != nil {
-		return nil, fmt.Errorf("error preparing query GetOSDetails: %w", err)
-	}
-	if q.getOsqueryInfoStmt, err = db.PrepareContext(ctx, getOsqueryInfo); err != nil {
-		return nil, fmt.Errorf("error preparing query GetOsqueryInfo: %w", err)
+	if q.getVersionStmt, err = db.PrepareContext(ctx, getVersion); err != nil {
+		return nil, fmt.Errorf("error preparing query GetVersion: %w", err)
 	}
 	if q.listAppsStmt, err = db.PrepareContext(ctx, listApps); err != nil {
 		return nil, fmt.Errorf("error preparing query ListApps: %w", err)
 	}
-	if q.upsertStmt, err = db.PrepareContext(ctx, upsert); err != nil {
-		return nil, fmt.Errorf("error preparing query Upsert: %w", err)
-	}
 	if q.upsertAppStmt, err = db.PrepareContext(ctx, upsertApp); err != nil {
 		return nil, fmt.Errorf("error preparing query UpsertApp: %w", err)
 	}
-	if q.upsertOSDetailsStmt, err = db.PrepareContext(ctx, upsertOSDetails); err != nil {
-		return nil, fmt.Errorf("error preparing query UpsertOSDetails: %w", err)
+	if q.upsertVersionsStmt, err = db.PrepareContext(ctx, upsertVersions); err != nil {
+		return nil, fmt.Errorf("error preparing query UpsertVersions: %w", err)
 	}
 	return &q, nil
 }
@@ -55,14 +49,9 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing countApplicationsStmt: %w", cerr)
 		}
 	}
-	if q.getOSDetailsStmt != nil {
-		if cerr := q.getOSDetailsStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getOSDetailsStmt: %w", cerr)
-		}
-	}
-	if q.getOsqueryInfoStmt != nil {
-		if cerr := q.getOsqueryInfoStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getOsqueryInfoStmt: %w", cerr)
+	if q.getVersionStmt != nil {
+		if cerr := q.getVersionStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getVersionStmt: %w", cerr)
 		}
 	}
 	if q.listAppsStmt != nil {
@@ -70,19 +59,14 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing listAppsStmt: %w", cerr)
 		}
 	}
-	if q.upsertStmt != nil {
-		if cerr := q.upsertStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing upsertStmt: %w", cerr)
-		}
-	}
 	if q.upsertAppStmt != nil {
 		if cerr := q.upsertAppStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing upsertAppStmt: %w", cerr)
 		}
 	}
-	if q.upsertOSDetailsStmt != nil {
-		if cerr := q.upsertOSDetailsStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing upsertOSDetailsStmt: %w", cerr)
+	if q.upsertVersionsStmt != nil {
+		if cerr := q.upsertVersionsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing upsertVersionsStmt: %w", cerr)
 		}
 	}
 	return err
@@ -125,12 +109,10 @@ type Queries struct {
 	db                    DBTX
 	tx                    *sql.Tx
 	countApplicationsStmt *sql.Stmt
-	getOSDetailsStmt      *sql.Stmt
-	getOsqueryInfoStmt    *sql.Stmt
+	getVersionStmt        *sql.Stmt
 	listAppsStmt          *sql.Stmt
-	upsertStmt            *sql.Stmt
 	upsertAppStmt         *sql.Stmt
-	upsertOSDetailsStmt   *sql.Stmt
+	upsertVersionsStmt    *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
@@ -138,11 +120,9 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		db:                    tx,
 		tx:                    tx,
 		countApplicationsStmt: q.countApplicationsStmt,
-		getOSDetailsStmt:      q.getOSDetailsStmt,
-		getOsqueryInfoStmt:    q.getOsqueryInfoStmt,
+		getVersionStmt:        q.getVersionStmt,
 		listAppsStmt:          q.listAppsStmt,
-		upsertStmt:            q.upsertStmt,
 		upsertAppStmt:         q.upsertAppStmt,
-		upsertOSDetailsStmt:   q.upsertOSDetailsStmt,
+		upsertVersionsStmt:    q.upsertVersionsStmt,
 	}
 }
