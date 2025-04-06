@@ -24,7 +24,7 @@ an endpoint to retrieve the latest data.
   SQL queries, that are present in the [migrations directiory](migrations).
 
 - We've define a CRON like abstraction for running periodic `osquery-cli`
-  commands. They're defined in [osquery jobs file](internal/oquery/jobs.go).
+  commands. They're defined in [osquery jobs file](internal/osquery/jobs.go).
   When the application starts up, it registers all the queries and schedules
   them to be run at periodic intervals. Once the jobs run, the result is parsed
   and inserted into respective postgres tables. Currently, we've defined just
