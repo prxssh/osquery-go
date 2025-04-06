@@ -30,6 +30,7 @@ func main() {
 	jobClient := osquery.NewOsqueryJobs(dbClient)
 	jobClient.ScheduleOsqueryJobs()
 
+	log.Info().Msg("Server is running on 6969")
 	if err := api.StartServer(repo); err != nil {
 		log.Fatal().Msgf("Failed to start server: %v", err)
 	}
